@@ -1,12 +1,10 @@
 name: Gradle Package
-
 on:
   push:
     branches:
       - main
       - feat/cicd
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
