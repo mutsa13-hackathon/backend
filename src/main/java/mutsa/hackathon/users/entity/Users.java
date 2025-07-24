@@ -3,9 +3,14 @@ package mutsa.hackathon.users.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import mutsa.hackathon.global.Gender;
+<<<<<<< HEAD
 import mutsa.hackathon.match.entity.Matching;
 import mutsa.hackathon.oauth.entity.RefreshToken;
+=======
+import mutsa.hackathon.match.entity.Match;
+>>>>>>> origin/feat/community
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -30,11 +35,12 @@ public class Users {
 
     private String destination;
 
-    private Double rate;
+    private BigDecimal rate;
 
-    private Integer coin;
+    private int coin;
 
     private String email;
+
 
     @OneToOne
     @JoinColumn(name = "tokenId")
@@ -42,4 +48,9 @@ public class Users {
 
     @OneToOne(mappedBy = "user")
     private Matching match;
+
+    // 성별 enum 정의 (내부 or 외부 클래스)
+    public enum Gender {
+        MALE, FEMALE
+    }
 }
