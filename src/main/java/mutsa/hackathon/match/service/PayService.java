@@ -13,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,16 +22,16 @@ import java.util.Map;
 public class PayService {
     private final MatchRepository matchRepository;
 
-    public Map<Long, Double> calculateEachPayment(Long matchId, double totalFare){
+    public Map<Long, Integer> calculateEachPayment(Long matchId, double totalFare){
         List<Matching> matched = matchRepository.findAllByMatchId(matchId);
 
-        Map<Long, Double> userDistances = new HashMap<>();
+        Map<Long, Double> userDistances = new LinkedHashMap<>(); // 순서 유지
         double totalDistance = 0;
 
         for (Matching match : matched) {
             Users user = match.getUser();
-            String departure = match.getDeparture(); // ex: "망원역"
-            String destination = user.getDestination(); // ex: "이대역"
+            String departure = match.getDeparture();
+            String destination = user.getDestination();
 
             double[] from = getLatLong(departure);
             double[] to = getLatLong(destination);
@@ -40,13 +41,27 @@ public class PayService {
             totalDistance += distance;
         }
 
-        Map<Long, Double> result = new HashMap<>();
+        Map<Long, Integer> result = new LinkedHashMap<>();
+        int remainingFare = (int) Math.round(totalFare); // 정수형 처리
+        Long lastUserId = null;
+
         for (Map.Entry<Long, Double> entry : userDistances.entrySet()) {
             Long userId = entry.getKey();
             double userDistance = entry.getValue();
-            double userPay = Math.round((userDistance / totalDistance) * totalFare);
+
+            double ratio = userDistance / totalDistance;
+            int userPay = (int) Math.floor(ratio * totalFare);
             result.put(userId, userPay);
+            remainingFare -= userPay;
+
+            lastUserId = userId;
         }
+
+        // 잔액 보정: 마지막 유저에게 차액 더해줌
+        if (lastUserId != null && remainingFare > 0) {
+            result.put(lastUserId, result.get(lastUserId) + remainingFare);
+        }
+
         return result;
     }
 
@@ -67,14 +82,11 @@ public class PayService {
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
             RestTemplate restTemplate = new RestTemplate();
-            System.out.println(restTemplate.exchange(url, HttpMethod.GET, entity, String.class));
-
             ResponseEntity<String> response = restTemplate.exchange(
                     url, HttpMethod.GET, entity, String.class
             );
 
             JSONArray results = new JSONArray(response.getBody());
-            System.out.println(response.getBody());
             JSONObject location = results.getJSONObject(0);
             double lat = Double.parseDouble(location.getString("lat"));
             double lon = Double.parseDouble(location.getString("lon"));

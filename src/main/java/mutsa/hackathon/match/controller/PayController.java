@@ -17,12 +17,10 @@ public class PayController {
     private final PayService payService;
 
     @GetMapping("/calculate")
-    public ResponseEntity<Map<Long, Double>> calculatePayment(
+    public ResponseEntity<Map<Long, Integer>> calculate(
             @RequestParam Long matchId,
-            @RequestParam double totalFare
-    ) {
-        Map<Long, Double> result = payService.calculateEachPayment(matchId, totalFare);
-        return ResponseEntity.ok(result);
+            @RequestParam double totalFare) {
+        return ResponseEntity.ok(payService.calculateEachPayment(matchId, totalFare));
     }
 
 }
