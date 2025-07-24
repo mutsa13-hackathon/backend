@@ -2,14 +2,8 @@ package mutsa.hackathon.users.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import mutsa.hackathon.global.Gender;
-<<<<<<< HEAD
 import mutsa.hackathon.match.entity.Matching;
 import mutsa.hackathon.oauth.entity.RefreshToken;
-=======
-import mutsa.hackathon.match.entity.Match;
->>>>>>> origin/feat/community
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
