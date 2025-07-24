@@ -3,7 +3,7 @@ package mutsa.hackathon.users.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import mutsa.hackathon.global.Gender;
-import mutsa.hackathon.match.entity.Match;
+import mutsa.hackathon.match.entity.Matching;
 import mutsa.hackathon.oauth.entity.RefreshToken;
 
 import java.time.LocalDate;
@@ -41,5 +41,5 @@ public class Users {
     private RefreshToken refreshToken;
 
     @OneToOne(mappedBy = "user")
-    private Match match;
+    private Matching match;
 }
