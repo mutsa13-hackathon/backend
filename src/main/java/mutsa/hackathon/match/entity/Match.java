@@ -5,7 +5,7 @@ import lombok.*;
 import mutsa.hackathon.users.entity.Users;
 
 @Entity
-@Table(name = "match")
+@Table(name = "'match'")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Match {
 
