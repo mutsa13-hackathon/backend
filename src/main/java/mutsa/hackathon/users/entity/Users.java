@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import mutsa.hackathon.global.Gender;
 import mutsa.hackathon.match.entity.Match;
-import mutsa.hackathon.oauth.entity.RefreshToken;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -30,16 +30,14 @@ public class Users {
 
     private String destination;
 
-    private Double rate;
+    private BigDecimal rate;
 
-    private Integer coin;
+    private int coin;
 
     private String email;
 
-    @OneToOne
-    @JoinColumn(name = "tokenId")
-    private RefreshToken refreshToken;
-
-    @OneToOne(mappedBy = "user")
-    private Match match;
+    // 성별 enum 정의 (내부 or 외부 클래스)
+    public enum Gender {
+        MALE, FEMALE
+    }
 }

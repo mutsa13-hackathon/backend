@@ -19,9 +19,10 @@ public class ArticleService {
     private final ArticleRepository articleRepository;
     private final UsersService usersService;
 
-    // 게시글 저장
-    public Long createArticle(ArticleRequestDTO requestDTO) {
-        var user = usersService.getUserById(requestDTO.getUserId());
+    // 게시글 등록
+    public Long createArticle(ArticleRequestDTO requestDTO, String email) {
+        var user = usersService.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         var article = Article.builder()
                 .title(requestDTO.getTitle())
@@ -46,22 +47,32 @@ public class ArticleService {
         return ArticleResponseDTO.fromEntity(article);
     }
 
-    // 게시글 삭제
-    @Transactional
-    public void deleteArticle(Long articleId) {
-        Article article = articleRepository.findById(articleId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
-        articleRepository.delete(article);
-    }
-
     // 게시글 수정
     @Transactional
-    public void updateArticle(Long articleId, ArticleRequestDTO requestDTO) {
+    public void updateArticle(Long articleId, ArticleRequestDTO requestDTO, String email) {
         Article article = articleRepository.findById(articleId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+
+        if (!article.getUser().getEmail().equals(email)) {
+            throw new SecurityException("본인이 작성한 게시글만 수정할 수 있습니다.");
+        }
+
         article.setTitle(requestDTO.getTitle());
         article.setContent(requestDTO.getContent());
-        // 필요 시 updatedAt 필드 갱신도 여기에 추가
+        // 필요 시 updatedAt 필드 갱신
+    }
+
+    // 게시글 삭제
+    @Transactional
+    public void deleteArticle(Long articleId, String email) {
+        Article article = articleRepository.findById(articleId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+
+        if (!article.getUser().getEmail().equals(email)) {
+            throw new SecurityException("본인이 작성한 게시글만 삭제할 수 있습니다.");
+        }
+
+        articleRepository.delete(article);
     }
 
 

@@ -23,8 +23,8 @@ public class CommentService {
     private final ArticleRepository articleRepository;
 
     // 댓글 생성
-    public Long createComment(CommentRequestDTO requestDTO) {
-        Users user = userRepository.findById(requestDTO.getUserId())
+    public Long createComment(CommentRequestDTO requestDTO, String email) {
+        Users user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
         Article article = articleRepository.findById(requestDTO.getArticleId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
@@ -39,9 +39,14 @@ public class CommentService {
     }
 
     // 댓글 삭제
-    public void deleteComment(Long commentId) {
+    public void deleteComment(Long commentId, String email) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
+
+        if (!comment.getUser().getEmail().equals(email)) {
+            throw new SecurityException("본인이 작성한 댓글만 삭제할 수 있습니다.");
+        }
+
         commentRepository.delete(comment);
     }
 
@@ -63,9 +68,13 @@ public class CommentService {
     }
 
     // 댓글 수정
-    public void updateComment(Long commentId, CommentRequestDTO requestDTO) {
+    public void updateComment(Long commentId, CommentRequestDTO requestDTO, String email) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
+
+        if (!comment.getUser().getEmail().equals(email)) {
+            throw new SecurityException("본인이 작성한 댓글만 수정할 수 있습니다.");
+        }
 
         comment.setComment(requestDTO.getComment());
         commentRepository.save(comment);
